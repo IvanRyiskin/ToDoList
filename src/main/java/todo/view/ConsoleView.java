@@ -72,6 +72,35 @@ public class ConsoleView {
         }
     }
 
+    private boolean checkDeletionAgreement(int id) {
+        String answer;
+
+        System.out.println("Вы уверены, что хотите удалить задачу с ID " + id + "? (y(yes)/n(no))");
+
+        while (true) {
+            answer = scanner.nextLine();
+            if (answer.equalsIgnoreCase("y") || answer.equalsIgnoreCase("yes")) {
+                return true;
+            } else if (answer.equalsIgnoreCase("n") || answer.equalsIgnoreCase("no")) {
+                return false;
+            } else {
+                System.out.println("Введите y(yes) или n(no)");
+            }
+        }
+    }
+
+    private boolean checkIntegerInput(String input) {
+        if (input.isBlank()) {
+            System.out.println("Введена пустая строка. Введите корректный числовой ID или 0 для выхода.");
+            return false;
+        } else if (!input.strip().matches("\\d+")) {
+            System.out.println("Некорректный ввод, ожидается целое положительное число. Попробуйте снова или введите 0 для выхода.");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     public void addTask() {
         String title;
         String description;
@@ -100,12 +129,14 @@ public class ConsoleView {
     public void getTaskById() {
         int id;
         Task task;
+        String input;
 
         while (true) {
             System.out.println("Введите ID задачи для поиска: ");
-            if (scanner.hasNextInt()) {
-                id = scanner.nextInt();
-                scanner.nextLine(); // Очистка буфера
+            input = scanner.nextLine();
+
+            if (checkIntegerInput(input)) {
+                id = Integer.parseInt(input.strip());
                 if (id > 0 && (task = taskService.getTask(id)) != null) {
                     System.out.println("Задача найдена: " + task + "\n");
                     return;
@@ -114,41 +145,38 @@ public class ConsoleView {
                 } else if (id < 0) {
                     System.out.println("ID не может быть отрицательным");
                 } else if (id == 0) {
-                    System.out.println("Поиск задачи отменен");
+                    System.out.println("Поиск задачи отменен!");
                     return;
                 }
-            } else {
-                System.out.println("Введите корректный ID");
-                scanner.nextLine(); // Очистка буфера
             }
         }
     }
 
     public void getTaskByTitle() {
-        String title;
+        String input;
         Task task;
 
         while (true) {
             System.out.println("Введите заголовок задачи для поиска: ");
-            if (scanner.hasNext()) {
-                title = scanner.next();
+            input = scanner.nextLine();
 
-                try {
-                    if (Integer.parseInt(title) == 0) {
-                        System.out.println("Поиск задачи отменен");
-                        scanner.nextLine(); // Очистка буфера
-                        return;
-                    }
-                } catch (NumberFormatException _) {
-                    // если не число, то продолжаем дальше
-                }
-
-                if (!title.isBlank() && (task = taskService.getTask(title)) != null) {
-                    System.out.println("Задача найдена: " + task + "\n");
-                    scanner.nextLine(); // Очистка буфера
+            try {
+                if (Integer.parseInt(input) == 0) {
+                    System.out.println("Поиск задачи отменен!");
                     return;
-                } else if (!title.isBlank() && (taskService.getTask(title)) == null) {
-                    System.out.println("Задача с заголовком " + title + " не найдена. Попробуйте снова или введите 0 для выхода");
+                }
+            } catch (NumberFormatException _) {
+                // если не число, то продолжаем дальше
+            }
+
+            if (input.isBlank()) {
+                System.out.println("Введена пустая строка. Введите корректный числовой ID или 0 для выхода.");
+            } else {
+                if ((task = taskService.getTask(input)) != null) {
+                    System.out.println("Задача найдена: " + task + "\n");
+                    return;
+                } else if ((taskService.getTask(input)) == null) {
+                    System.out.println("Задача с заголовком " + input + " не найдена. Попробуйте снова или введите 0 для выхода");
                 }
             }
         }
@@ -156,6 +184,7 @@ public class ConsoleView {
 
     public void getAllTasks() {
         List<Task> tasks = taskService.getAllTasks();
+
         if (tasks.isEmpty()) {
             System.out.println("Список задач пуст");
             return;
@@ -175,12 +204,7 @@ public class ConsoleView {
         while (true) {
             System.out.println("Введите ID задачи для обновления: ");
             String input = scanner.nextLine();
-
-            if (input.isBlank()) {
-                System.out.println("Введена пустая строка. Введите корректный числовой ID или 0 для выхода.");
-            } else if (!input.strip().matches("\\d+")) {
-                System.out.println("Некорректный ввод, ожидается целое положительное число. Попробуйте снова или введите 0 для выхода.");
-            } else {
+            if (checkIntegerInput(input)) {
                 id = Integer.parseInt(input.strip());
                 task = taskService.getTask(id);
                 if (id > 0 && task != null) {
@@ -213,7 +237,7 @@ public class ConsoleView {
                 } else if (id > 0) {
                     System.out.println("Задача с ID " + id + " не найдена. Попробуйте снова или введите 0 для выхода");
                 } else if (id == 0) {
-                    System.out.println("Обновление задачи отменено");
+                    System.out.println("Обновление задачи отменено!");
                     return;
                 }
             }
@@ -221,21 +245,26 @@ public class ConsoleView {
         System.out.println("Задача успешно обновлена! \n" + task);
     }
 
-
     public void deleteTask() {
         int id;
         Task task;
+        String input;
 
         while (true) {
             System.out.println("Введите ID задачи для удаления: ");
-            if (scanner.hasNextInt()) {
-                id = scanner.nextInt();
+            input = scanner.nextLine();
+            if (checkIntegerInput(input)) {
+                id = Integer.parseInt(input.strip());
                 task = taskService.getTask(id);
-                scanner.nextLine(); // Очистка буфера
                 if (id > 0 && task != null) {
-                    boolean complete = taskService.deleteTask(id);
-                    if (!complete) {
-                        System.out.println("Не удалось удалить задачу, попробуйте снова или введите 0 для выхода");
+                    if (checkDeletionAgreement(id)) {
+                        boolean completeDelete = taskService.deleteTask(id);
+                        if (!completeDelete) {
+                            System.out.println("Не удалось удалить задачу, попробуйте снова или введите 0 для выхода");
+                            continue;
+                        }
+                    } else {
+                        System.out.println("Удаление задачи " + id + " отменено!");
                         continue;
                     }
                     break;
@@ -247,12 +276,9 @@ public class ConsoleView {
                     System.out.println("Удаление задачи отменено!");
                     return;
                 }
-            } else {
-                System.out.println("Введите корректный ID");
-                scanner.nextLine(); // Очистка буфера
             }
         }
-        System.out.println("Задача успешно удалена! \n" + task);
+        System.out.println("Задача успешно удалена!");
     }
 }
 

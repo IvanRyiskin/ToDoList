@@ -13,5 +13,5 @@ public interface TaskRepository<Task> {
 
     boolean updateTask(int id, String title, String description);
 
-    Task deleteTask(int id);
+    boolean deleteTask(int id);
 }
