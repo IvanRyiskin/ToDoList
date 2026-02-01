@@ -13,6 +13,7 @@ public class TaskService {
     }
 
     public Task createTask(String title, String description) {
+//        убрать генерацию айди в классе таск, перенести сюда
         return new Task(title, description);
     }
 
@@ -37,6 +38,6 @@ public class TaskService {
     }
 
     public boolean deleteTask(int id) {
-        return repository.deleteTask(id) != null;
+        return repository.deleteTask(id);
     }
 }
