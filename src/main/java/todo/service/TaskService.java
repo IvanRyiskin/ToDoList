@@ -7,14 +7,14 @@ import java.util.List;
 
 public class TaskService {
     private final TaskRepository<Task> repository;
+    private int idCounter = 1;
 
     public TaskService(TaskRepository<Task> repository) {
         this.repository = repository;
     }
 
     public Task createTask(String title, String description) {
-//        убрать генерацию айди в классе таск, перенести сюда
-        return new Task(title, description);
+        return new Task(idCounter++, title, description);
     }
 
     public boolean addTask(Task task) {

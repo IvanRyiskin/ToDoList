@@ -24,7 +24,7 @@ class TaskServiceTest {
 
     @BeforeEach
     void setUp() {
-        task = new Task("Task", "Description");
+        task = new Task((int) (Math.random() * 1000),"Task", "Description");
     }
 
     @Test
