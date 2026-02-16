@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
-    private static int idCounter = 1;
     private final int ID;
     private String title;
     private String description;
@@ -15,8 +14,8 @@ public class Task {
 //        NEW, IN_PROGRESS, DONE
 //    }
 
-    public Task(String title, String description) {
-        this.ID = idCounter++;
+    public Task(int id, String title, String description) {
+        this.ID = id;
         this.title = title;
         this.description = description;
         this.CREATEDATE = LocalDateTime.now();

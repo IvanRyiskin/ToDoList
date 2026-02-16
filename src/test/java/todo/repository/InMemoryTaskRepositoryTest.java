@@ -14,7 +14,7 @@ class InMemoryTaskRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        task = new Task("Beer", "Drink beer");
+        task = new Task(200,"Beer", "Drink beer");
         repository = new InMemoryTaskRepository();
     }
 
@@ -96,6 +96,6 @@ class InMemoryTaskRepositoryTest {
 
     @Test
     void deleteTaskFail() {
-        assertNull(repository.deleteTask(100));
+        assertFalse(repository.deleteTask(100));
     }
 }

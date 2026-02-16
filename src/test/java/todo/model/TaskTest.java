@@ -10,7 +10,7 @@ class TaskTest {
 
     @BeforeEach
     void init() {
-        task  = new Task("Beer", "Drink");
+        task  = new Task(100,"Beer", "Drink");
     }
 
     @Test
