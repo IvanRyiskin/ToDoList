@@ -5,7 +5,7 @@ import todo.model.Task;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InMemoryTaskRepository implements TaskRepository<Task> {
+public class InMemoryTaskRepositoryList implements TaskRepository<Task> {
     List<Task> tasks = new ArrayList<>();
 
     @Override

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import todo.model.Task;
-import todo.repository.InMemoryTaskRepository;
+import todo.repository.InMemoryTaskRepositoryList;
 import todo.repository.TaskRepository;
 
 import java.util.List;
@@ -18,7 +18,7 @@ class TaskServiceTest {
 
     @BeforeAll
     static void init() {
-        repository = new InMemoryTaskRepository();
+        repository = new InMemoryTaskRepositoryList();
         service = new TaskService(repository);
     }
 

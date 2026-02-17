@@ -1,7 +1,7 @@
 package todo;
 
 import todo.model.Task;
-import todo.repository.InMemoryTaskRepository;
+import todo.repository.InMemoryTaskRepositoryMap;
 import todo.repository.TaskRepository;
 import todo.service.TaskService;
 import todo.view.ConsoleView;
@@ -9,7 +9,7 @@ import todo.view.ConsoleView;
 public class Main {
     public static void main(String[] args) {
         // Репозиторий (хранилище в памяти)
-        TaskRepository<Task> repository = new InMemoryTaskRepository();
+        TaskRepository<Task> repository = new InMemoryTaskRepositoryMap();
 
         // Сервис, использующий репозиторий
         TaskService service = new TaskService(repository);
@@ -22,4 +22,3 @@ public class Main {
 
 // Задачи:
 // 1. добавить lombok;
-// 2. Добавить реализацию с Map
