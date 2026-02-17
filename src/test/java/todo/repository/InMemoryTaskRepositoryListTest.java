@@ -8,14 +8,14 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class InMemoryTaskRepositoryTest {
+class InMemoryTaskRepositoryListTest {
     Task task;
     TaskRepository<Task> repository;
 
     @BeforeEach
     void setUp() {
-        task = new Task(200,"Beer", "Drink beer");
-        repository = new InMemoryTaskRepository();
+        task = new Task(200, "Beer", "Drink beer");
+        repository = new InMemoryTaskRepositoryList();
     }
 
     @Test
