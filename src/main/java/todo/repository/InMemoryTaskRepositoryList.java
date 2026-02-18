@@ -2,6 +2,7 @@ package todo.repository;
 
 import todo.model.Task;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +40,7 @@ public class InMemoryTaskRepositoryList implements TaskRepository<Task> {
     }
 
     @Override
-    public boolean updateTask(int id, String updatedTitle, String updatedDescription) {
+    public boolean updateTask(int id, String updatedTitle, String updatedDescription, LocalDateTime localDateTime) {
         for (Task task : tasks) {
             if (task.getID() == id) {
                 if (updatedTitle != null) {
@@ -48,7 +49,7 @@ public class InMemoryTaskRepositoryList implements TaskRepository<Task> {
                 if (updatedDescription != null) {
                     task.setDescription(updatedDescription);
                 }
-                task.setUpdateDate();
+                task.setUpdateDate(localDateTime);
                 return true;
             }
         }

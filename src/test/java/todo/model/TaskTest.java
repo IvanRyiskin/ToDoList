@@ -3,6 +3,8 @@ package todo.model;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class TaskTest {
@@ -10,7 +12,7 @@ class TaskTest {
 
     @BeforeEach
     void init() {
-        task  = new Task(100,"Beer", "Drink");
+        task  = new Task(100,"Beer", "Drink", LocalDateTime.now());
     }
 
     @Test
@@ -38,7 +40,7 @@ class TaskTest {
 
     @Test
     void setAndGetUpdateDate() {
-        task.setUpdateDate();
+        task.setUpdateDate(LocalDateTime.now());
         assertNotNull(task.getUpdateDate());
         System.out.println("Дата обновления: " + task.getUpdateDate() + "\n");
     }

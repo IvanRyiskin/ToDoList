@@ -7,6 +7,7 @@ import todo.model.Task;
 import todo.repository.InMemoryTaskRepositoryList;
 import todo.repository.TaskRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,7 +25,7 @@ class TaskServiceTest {
 
     @BeforeEach
     void setUp() {
-        task = new Task((int) (Math.random() * 1000),"Task", "Description");
+        task = new Task((int) (Math.random() * 1000),"Task", "Description", LocalDateTime.now());
     }
 
     @Test

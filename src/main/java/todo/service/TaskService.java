@@ -3,6 +3,7 @@ package todo.service;
 import todo.model.Task;
 import todo.repository.TaskRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class TaskService {
@@ -14,7 +15,7 @@ public class TaskService {
     }
 
     public Task createTask(String title, String description) {
-        return new Task(idCounter++, title, description);
+        return new Task(idCounter++, title, description, LocalDateTime.now());
     }
 
     public boolean addTask(Task task) {
@@ -34,7 +35,7 @@ public class TaskService {
     }
 
     public boolean updateTask(int id, String updatedTitle, String updatedDescription) {
-        return repository.updateTask(id, updatedTitle, updatedDescription);
+        return repository.updateTask(id, updatedTitle, updatedDescription, LocalDateTime.now());
     }
 
     public boolean deleteTask(int id) {
