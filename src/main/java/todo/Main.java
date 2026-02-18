@@ -19,6 +19,3 @@ public class Main {
         view.start();
     }
 }
-
-// Задачи:
-// 1. добавить lombok;

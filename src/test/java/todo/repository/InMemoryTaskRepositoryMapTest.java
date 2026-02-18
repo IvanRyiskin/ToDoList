@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import todo.model.Task;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,7 +15,7 @@ class InMemoryTaskRepositoryMapTest {
 
     @BeforeEach
     void setUp() {
-        task = new Task(200, "Beer", "Drink beer");
+        task = new Task(200, "Beer", "Drink beer", LocalDateTime.now());
         repository = new InMemoryTaskRepositoryMap();
     }
 
@@ -61,7 +62,7 @@ class InMemoryTaskRepositoryMapTest {
         String updatedTitle = "Geeky";
         String updatedDescription = "Drink beer and code";
         repository.addTask(task);
-        repository.updateTask(taskId, updatedTitle, updatedDescription);
+        repository.updateTask(taskId, updatedTitle, updatedDescription, LocalDateTime.now());
         assertEquals(updatedTitle, task.getTitle());
         assertEquals(updatedDescription, task.getDescription());
     }
@@ -71,7 +72,7 @@ class InMemoryTaskRepositoryMapTest {
         int taskId = task.getID();
         String updatedTitle = "Geeky1";
         repository.addTask(task);
-        repository.updateTask(taskId, updatedTitle, null);
+        repository.updateTask(taskId, updatedTitle, null, LocalDateTime.now());
         assertEquals(updatedTitle, task.getTitle());
         assertEquals("Drink beer", task.getDescription());
     }
@@ -81,7 +82,7 @@ class InMemoryTaskRepositoryMapTest {
         int taskId = task.getID();
         String updatedDescription = "Drink beer and code2";
         repository.addTask(task);
-        repository.updateTask(taskId, null, updatedDescription);
+        repository.updateTask(taskId, null, updatedDescription, LocalDateTime.now());
         assertEquals("Beer", task.getTitle());
         assertEquals(updatedDescription, task.getDescription());
     }

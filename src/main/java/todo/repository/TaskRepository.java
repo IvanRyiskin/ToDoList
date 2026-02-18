@@ -1,5 +1,6 @@
 package todo.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TaskRepository<Task> {
@@ -11,7 +12,7 @@ public interface TaskRepository<Task> {
 
     List<Task> getAllTasks();
 
-    boolean updateTask(int id, String title, String description);
+    boolean updateTask(int id, String title, String description, LocalDateTime localDateTime);
 
     boolean deleteTask(int id);
 }
