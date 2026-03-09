@@ -10,6 +10,10 @@ public class TaskService {
     private final TaskRepository<Task> repository;
     private int idCounter = 1;
 
+    private static Task copyTask(Task task){
+        return new Task(task.getID(), task.getTitle(), task.getDescription(), task.getCREATEDATE());
+    }
+
     public TaskService(TaskRepository<Task> repository) {
         this.repository = repository;
     }
@@ -34,11 +38,12 @@ public class TaskService {
         return repository.getAllTasks();
     }
 
-    public boolean updateTask(int id, String updatedTitle, String updatedDescription) {
-        return repository.updateTask(id, updatedTitle, updatedDescription, LocalDateTime.now());
+    public boolean updateTask(Task task, String updatedTitle, String updatedDescription) {
+        Task updatedTask = copyTask(task);
+        return repository.updateTask(task, updatedTask, updatedTitle, updatedDescription, LocalDateTime.now());
     }
 
-    public boolean deleteTask(int id) {
-        return repository.deleteTask(id);
+    public boolean deleteTask(Task task) {
+        return repository.deleteTask(task);
     }
 }
