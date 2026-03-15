@@ -1,17 +1,25 @@
 package todo.service;
 
+import todo.model.FileTask;
 import todo.model.Task;
 import todo.repository.TaskRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 public class TaskService {
     private final TaskRepository<Task> repository;
+    private final BlockingQueue<FileTask> blockingQueue;
     private int idCounter = 1;
 
-    public TaskService(TaskRepository<Task> repository) {
+    public TaskService(TaskRepository<Task> repository, BlockingQueue<FileTask> blockingQueue) {
         this.repository = repository;
+        this.blockingQueue = blockingQueue;
+    }
+
+    private static Task copyTask(Task task) {
+        return new Task(task.getID(), task.getTitle(), task.getDescription(), task.getCREATEDATE());
     }
 
     public Task createTask(String title, String description) {
@@ -34,11 +42,12 @@ public class TaskService {
         return repository.getAllTasks();
     }
 
-    public boolean updateTask(int id, String updatedTitle, String updatedDescription) {
-        return repository.updateTask(id, updatedTitle, updatedDescription, LocalDateTime.now());
+    public boolean updateTask(Task task, String updatedTitle, String updatedDescription) {
+        Task updatedTask = copyTask(task);
+        return repository.updateTask(task, updatedTask, updatedTitle, updatedDescription, LocalDateTime.now());
     }
 
-    public boolean deleteTask(int id) {
-        return repository.deleteTask(id);
+    public boolean deleteTask(Task task) {
+        return repository.deleteTask(task);
     }
 }

@@ -12,7 +12,7 @@ public interface TaskRepository<Task> {
 
     List<Task> getAllTasks();
 
-    boolean updateTask(int id, String title, String description, LocalDateTime localDateTime);
+    boolean updateTask(Task originTask, Task updatedTask, String title, String description, LocalDateTime localDateTime);
 
-    boolean deleteTask(int id);
+    boolean deleteTask(Task task);
 }

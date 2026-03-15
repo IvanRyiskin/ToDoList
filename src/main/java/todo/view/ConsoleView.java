@@ -5,13 +5,16 @@ import todo.service.TaskService;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.BlockingQueue;
 
 public class ConsoleView {
     private final TaskService taskService;
+    private final BlockingQueue blockingQueue;
     private final Scanner scanner;
 
-    public ConsoleView(TaskService taskService) {
+    public ConsoleView(TaskService taskService, BlockingQueue blockingQueue) {
         this.taskService = taskService;
+        this.blockingQueue = blockingQueue;
         this.scanner = new Scanner(System.in);
     }
 
@@ -213,21 +216,21 @@ public class ConsoleView {
                     System.out.println("Введите новое описание задачи: ");
                     description = scanner.nextLine();
                     if (!title.isBlank() && !description.isBlank()) {
-                        boolean completed = taskService.updateTask(id, title, description);
+                        boolean completed = taskService.updateTask(task, title, description);
                         if (!completed) {
                             printFailedUpdateMessage.run();
                             continue;
                         }
                         break;
                     } else if (!title.isBlank() && description.isBlank()) {
-                        boolean completed = taskService.updateTask(id, title, null);
+                        boolean completed = taskService.updateTask(task, title, null);
                         if (!completed) {
                             printFailedUpdateMessage.run();
                             continue;
                         }
                         break;
                     } else if (title.isBlank() && !description.isBlank()) {
-                        boolean completed = taskService.updateTask(id, null, description);
+                        boolean completed = taskService.updateTask(task, null, description);
                         if (!completed) {
                             printFailedUpdateMessage.run();
                             continue;
@@ -258,7 +261,7 @@ public class ConsoleView {
                 task = taskService.getTask(id);
                 if (id > 0 && task != null) {
                     if (checkDeletionAgreement(id)) {
-                        boolean completeDelete = taskService.deleteTask(id);
+                        boolean completeDelete = taskService.deleteTask(task);
                         if (!completeDelete) {
                             System.out.println("Не удалось удалить задачу, попробуйте снова или введите 0 для выхода");
                             continue;
