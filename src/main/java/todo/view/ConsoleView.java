@@ -5,13 +5,16 @@ import todo.service.TaskService;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.BlockingQueue;
 
 public class ConsoleView {
     private final TaskService taskService;
+    private final BlockingQueue blockingQueue;
     private final Scanner scanner;
 
-    public ConsoleView(TaskService taskService) {
+    public ConsoleView(TaskService taskService, BlockingQueue blockingQueue) {
         this.taskService = taskService;
+        this.blockingQueue = blockingQueue;
         this.scanner = new Scanner(System.in);
     }
 

@@ -1,15 +1,68 @@
 package todo.repository;
 
-import java.io.File;
+import todo.model.Task;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class FileTaskRepository {
 
-    // сделать конструкторы пустой и с параметром
-    // в конструкторе проверять есть ли такой файл, если нет, то создать, иначе вернуть готовый файл
-    // создать 2 метода: 1 начальный, для записи при старте, 2 для записи
+    private Path path;
 
-    File file;
+    public FileTaskRepository(Path path) {
+        createFile(path);
+    }
 
-    public FileTaskRepository(String path){
+    public FileTaskRepository() {
+        this(Path.of(System.getProperty("user.home"), "TODO.txt"));
+    }
+
+    public boolean createFile(Path path) {
+        this.path = path;
+        if (!Files.exists(path)) {
+            try {
+                Path parent = this.path.getParent();
+                if (parent != null) {
+                    Files.createDirectories(parent); // Создаём родительскую папку (если нужно)
+                }
+                Files.createFile(this.path);
+            } catch (IOException e) {
+                throw new RuntimeException("Ошибка создания файла по пути" + path);
+            }
+        }
+        return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    public ConcurrentMap<Integer, Task> getData() {
+        if (!Files.exists(path)) {
+            return new ConcurrentHashMap<>();
+        }
+        try (ObjectInputStream object = new ObjectInputStream(Files.newInputStream(path))) {
+            Object obj = object.readObject();
+            if (!(obj instanceof ConcurrentMap<?, ?>)) {
+                throw new IllegalStateException("Ожидался ConcurrentMap, но получен: " + obj.getClass());
+            }
+            return (ConcurrentMap<Integer, Task>) obj;
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException("Ошибка при чтении данных из файла: " + path, e);
+        }
+    }
+
+    public boolean writeData(ConcurrentMap<Integer, Task> data) {
+        if (!Files.exists(path)) {
+            createFile(path);
+        }
+        try (ObjectOutputStream object = new ObjectOutputStream(Files.newOutputStream(path))) {
+            object.writeObject(data);
+            return true;
+        } catch (IOException e) {
+            throw new RuntimeException("Ошибка при записи данных в файл: " + path, e);
+        }
     }
 }
