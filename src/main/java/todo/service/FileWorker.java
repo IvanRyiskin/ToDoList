@@ -1,24 +1,25 @@
 package todo.service;
 
 import todo.model.FileTask;
-import todo.repository.FileTaskRepository;
-import todo.repository.InMemoryTaskRepositoryMap;
+import todo.model.Task;
+import todo.repository.FileRepository;
+import todo.repository.TaskRepository;
 
 import java.util.concurrent.*;
 
 public class FileWorker {
-    final FileTaskRepository fileTaskRepository;
+    final FileRepository fileTaskRepository;
     final BlockingQueue<FileTask> blockingQueue;
-    final InMemoryTaskRepositoryMap inMemoryTaskRepositoryMap;
+    final TaskRepository<Task> inMemoryTaskRepositoryMap;
     private Future<?> future;
     ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    public FileWorker(FileTaskRepository fileTaskRepository,
+    public FileWorker(FileRepository fileRepository,
                       BlockingQueue<FileTask> blockingQueue,
-                      InMemoryTaskRepositoryMap inMemoryTaskRepositoryMap) {
-        this.fileTaskRepository = fileTaskRepository;
+                      TaskRepository<Task> inMemoryRepositoryMap) {
+        this.fileTaskRepository = fileRepository;
         this.blockingQueue = blockingQueue;
-        this.inMemoryTaskRepositoryMap = inMemoryTaskRepositoryMap;
+        this.inMemoryTaskRepositoryMap = inMemoryRepositoryMap;
     }
 
     public void start() {

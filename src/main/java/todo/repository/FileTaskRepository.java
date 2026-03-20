@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class FileTaskRepository {
+public class FileTaskRepository implements FileRepository {
 
     private Path path;
 
@@ -40,15 +40,31 @@ public class FileTaskRepository {
 
     @SuppressWarnings("unchecked")
     public ConcurrentMap<Integer, Task> getData() {
+        // 1. Проверяем, существует ли файл
         if (!Files.exists(path)) {
             return new ConcurrentHashMap<>();
         }
+
+        // 2. Проверяем, пустой ли файл
+        long size;
+        try {
+            size = Files.size(path);
+        } catch (IOException e) {
+            System.out.println("Не удалось прочитать размер файла: " + e.getMessage());
+            return new ConcurrentHashMap<>();
+        }
+        if (size == 0) {
+            return new ConcurrentHashMap<>();
+        }
+
+        // 3. Читаем объект
         try (ObjectInputStream object = new ObjectInputStream(Files.newInputStream(path))) {
-            Object obj = object.readObject();
-            if (!(obj instanceof ConcurrentMap<?, ?>)) {
-                throw new IllegalStateException("Ожидался ConcurrentMap, но получен: " + obj.getClass());
+            Object fileObject = object.readObject();
+            if (!(fileObject instanceof ConcurrentMap<?, ?>)) {
+                System.out.println("Обнаружен неверный формат данных. Создаем новый файл...");
+                return new ConcurrentHashMap<>();
             }
-            return (ConcurrentMap<Integer, Task>) obj;
+            return (ConcurrentMap<Integer, Task>) fileObject;
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException("Ошибка при чтении данных из файла: " + path, e);
         }

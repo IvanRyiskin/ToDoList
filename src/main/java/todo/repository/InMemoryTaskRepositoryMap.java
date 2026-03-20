@@ -10,19 +10,29 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class InMemoryTaskRepositoryMap implements TaskRepository<Task>, Serializable {
-    ConcurrentMap<Integer, Task> tasks = new ConcurrentHashMap<>();
 
-    @Override
+    private final ConcurrentMap<Integer, Task> tasks;
+
+    public InMemoryTaskRepositoryMap() {
+        tasks = new ConcurrentHashMap<>();
+    }
+
+    public InMemoryTaskRepositoryMap(ConcurrentMap<Integer, Task> tasks) {
+        this.tasks = tasks;
+    }
+
+    public ConcurrentMap<Integer, Task> getTasksRepository() {
+        return tasks;
+    }
+
     public boolean addTask(Task task) {
         return tasks.putIfAbsent(task.getID(), task) == null;
     }
 
-    @Override
     public Task getTask(int id) {
         return tasks.getOrDefault(id, null);
     }
 
-    @Override
     public Task getTask(String title) {
         for (Task task : tasks.values()) {
             if (task.getTitle().equals(title)) {
@@ -32,12 +42,10 @@ public class InMemoryTaskRepositoryMap implements TaskRepository<Task>, Serializ
         return null;
     }
 
-    @Override
     public List<Task> getAllTasks() {
         return new ArrayList<>(tasks.values());
     }
 
-    @Override
     public boolean updateTask(Task task, Task updatedTask, String updatedTitle, String updatedDescription, LocalDateTime localDateTime) {
         if (updatedTitle != null) {
             updatedTask.setTitle(updatedTitle);
@@ -49,7 +57,6 @@ public class InMemoryTaskRepositoryMap implements TaskRepository<Task>, Serializ
         return tasks.replace(task.getID(), task, updatedTask);
     }
 
-    @Override
     public boolean deleteTask(Task task) {
         return tasks.remove(task.getID(), task);
     }

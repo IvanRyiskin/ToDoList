@@ -3,29 +3,34 @@ package todo.service;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import todo.model.FileTask;
 import todo.model.Task;
 import todo.repository.InMemoryTaskRepositoryMap;
 import todo.repository.TaskRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class TaskServiceTest {
     static TaskService service;
     static TaskRepository<Task> repository;
+    static BlockingQueue<FileTask> blockingQueue;
     Task task;
 
     @BeforeAll
     static void init() {
+        BlockingQueue<FileTask> blockingQueue = new LinkedBlockingQueue<>();
         repository = new InMemoryTaskRepositoryMap();
-        service = new TaskService(repository);
+        service = new TaskService(repository, blockingQueue);
     }
 
     @BeforeEach
     void setUp() {
-        task = new Task((int) (Math.random() * 1000),"Task", "Description", LocalDateTime.now());
+        task = new Task((int) (Math.random() * 1000), "Task", "Description", LocalDateTime.now());
     }
 
     @Test
@@ -45,7 +50,7 @@ class TaskServiceTest {
     @Test
     void getTaskById() {
         service.addTask(task);
-        Task result  = service.getTask(task.getID());
+        Task result = service.getTask(task.getID());
         assertEquals(task, result);
     }
 

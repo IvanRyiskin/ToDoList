@@ -1,5 +1,7 @@
 package todo.view;
 
+import todo.model.FileAction;
+import todo.model.FileTask;
 import todo.model.Task;
 import todo.service.TaskService;
 
@@ -9,17 +11,27 @@ import java.util.concurrent.BlockingQueue;
 
 public class ConsoleView {
     private final TaskService taskService;
-    private final BlockingQueue blockingQueue;
+    private final BlockingQueue<FileTask> blockingQueue;
     private final Scanner scanner;
 
-    public ConsoleView(TaskService taskService, BlockingQueue blockingQueue) {
+    public ConsoleView(TaskService taskService, BlockingQueue<FileTask> blockingQueue) {
         this.taskService = taskService;
         this.blockingQueue = blockingQueue;
         this.scanner = new Scanner(System.in);
     }
 
     public void start() {
-        while (true) {
+        try {
+            blockingQueue.put(new FileTask(FileAction.GET));
+        } catch (InterruptedException e) {
+            try {
+                System.err.println("Произошла непредвиденная ошибка. Работа приложения завершается.");
+                blockingQueue.put(new FileTask(FileAction.EXIT));
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+        while (true) { // в будущем сделать проверку на интеррапт и обработку, если что-то пойдет не так в самом цикле
             printMenu();
             String choice = scanner.nextLine();
 

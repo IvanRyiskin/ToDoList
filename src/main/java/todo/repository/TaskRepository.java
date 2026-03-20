@@ -2,8 +2,12 @@ package todo.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 
 public interface TaskRepository<Task> {
+
+    ConcurrentMap<Integer, Task> getTasksRepository();
+
     boolean addTask(Task task);
 
     Task getTask(int id);
