@@ -50,7 +50,7 @@ public class FileTaskRepository implements FileRepository {
         try {
             size = Files.size(path);
         } catch (IOException e) {
-            System.out.println("Не удалось прочитать размер файла: " + e.getMessage());
+            System.err.println("Не удалось прочитать размер файла: " + e.getMessage());
             return new ConcurrentHashMap<>();
         }
         if (size == 0) {
@@ -61,7 +61,7 @@ public class FileTaskRepository implements FileRepository {
         try (ObjectInputStream object = new ObjectInputStream(Files.newInputStream(path))) {
             Object fileObject = object.readObject();
             if (!(fileObject instanceof ConcurrentMap<?, ?>)) {
-                System.out.println("Обнаружен неверный формат данных. Создаем новый файл...");
+                System.err.println("Обнаружен неверный формат данных. Создаем новый файл...");
                 return new ConcurrentHashMap<>();
             }
             return (ConcurrentMap<Integer, Task>) fileObject;
