@@ -1,6 +1,5 @@
 package todo.view;
 
-import todo.model.FileAction;
 import todo.model.FileTask;
 import todo.model.Task;
 import todo.service.TaskService;
@@ -21,16 +20,6 @@ public class ConsoleView {
     }
 
     public void start() {
-        try {
-            blockingQueue.put(new FileTask(FileAction.GET));
-        } catch (InterruptedException e) {
-            try {
-                System.err.println("Произошла непредвиденная ошибка. Работа приложения завершается.");
-                blockingQueue.put(new FileTask(FileAction.EXIT));
-            } catch (InterruptedException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
         while (true) { // в будущем сделать проверку на интеррапт и обработку, если что-то пойдет не так в самом цикле
             printMenu();
             String choice = scanner.nextLine();

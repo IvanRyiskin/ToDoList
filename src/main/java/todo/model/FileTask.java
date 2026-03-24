@@ -1,3 +1,6 @@
 package todo.model;
 
-public record FileTask(FileAction action, Object... data) {}
+import java.nio.file.Path;
+
+public record FileTask(FileAction action, Path path) {
+}

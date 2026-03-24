@@ -1,10 +1,12 @@
 package todo.service;
 
+import todo.model.FileAction;
 import todo.model.FileTask;
 import todo.model.Task;
 import todo.repository.FileRepository;
 import todo.repository.TaskRepository;
 
+import java.nio.file.Path;
 import java.util.concurrent.*;
 
 public class FileWorker {
@@ -27,8 +29,9 @@ public class FileWorker {
             try {
                 while (!Thread.currentThread().isInterrupted()) {
                     FileTask task = blockingQueue.take();
-                    // логика обработки действий
-                    // смотрим у таски тип fileaction, вызываем нужные методы (объявить наравне со старт\стоп методами)
+                    FileAction action = task.action();
+                    Path path = task.path();
+                    fileAction(action, path);
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -36,7 +39,7 @@ public class FileWorker {
         });
     }
 
-    public void stop() {
+    private void stop() {
         if (future != null) {
             future.cancel(true);
         }
@@ -48,6 +51,28 @@ public class FileWorker {
         } catch (InterruptedException e) {
             executor.shutdownNow();
             Thread.currentThread().interrupt();
+        }
+    }
+
+    private static Task copyTask(Task task) {
+        return new Task(task.getID(), task.getTitle(), task.getDescription(), task.getCREATEDATE());
+    }
+
+    private ConcurrentMap<Integer, Task> createSnapshot() {
+        ConcurrentMap<Integer, Task> snapshot = new ConcurrentHashMap<>();
+        for (Task task : inMemoryTaskRepositoryMap.getAllTasks()) {
+            snapshot.put(task.getID(), copyTask(task));
+        }
+        return snapshot;
+    }
+
+    private void fileAction(FileAction action, Path data) {
+        switch (action) {
+            // придумать как посылать итог ConsoleView
+            // как вариант - создать еще один поток, читающий итог этого из blockingQueue и выводящий итог в консоль
+            case PUT -> fileTaskRepository.writeData(createSnapshot());
+            case CHANGE_FILE -> fileTaskRepository.createFile(data);
+            case EXIT -> stop();
         }
     }
 }
