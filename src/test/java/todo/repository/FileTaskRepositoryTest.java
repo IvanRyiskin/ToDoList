@@ -72,4 +72,11 @@ class FileTaskRepositoryTest {
         assertTrue(fileRepository.writeData(inMemoryRepository.getTasksRepository()));
         tempFiles.add(path);
     }
+
+    // тест для проверки десериализации
+    @Test
+    void getDataFro1mFile() {
+        assertFalse(fileRepository.getData().isEmpty());
+        System.out.println(fileRepository.getData());
+    }
 }

@@ -1,7 +1,9 @@
 package todo.model;
 
 public enum FileAction {
-    PUT,
+    ADD,
+    UPDATE,
+    DELETE,
     CHANGE_FILE,
     EXIT
 }

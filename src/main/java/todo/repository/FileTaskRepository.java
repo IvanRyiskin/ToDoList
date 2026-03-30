@@ -58,15 +58,17 @@ public class FileTaskRepository implements FileRepository {
         }
 
         // 3. Читаем объект
+        Object fileObject;
         try (ObjectInputStream object = new ObjectInputStream(Files.newInputStream(path))) {
-            Object fileObject = object.readObject();
-            if (!(fileObject instanceof ConcurrentMap<?, ?>)) {
-                System.err.println("Обнаружен неверный формат данных. Создаем новый файл...");
-                return new ConcurrentHashMap<>();
-            }
-            return (ConcurrentMap<Integer, Task>) fileObject;
+            fileObject = object.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException("Ошибка при чтении данных из файла: " + path, e);
+        }
+        if (!(fileObject instanceof ConcurrentMap<?, ?>)) {
+            System.err.println("Обнаружен неверный формат данных. Создаем новый файл...");
+            return new ConcurrentHashMap<>();
+        } else {
+            return (ConcurrentMap<Integer, Task>) fileObject;
         }
     }
 
@@ -76,9 +78,9 @@ public class FileTaskRepository implements FileRepository {
         }
         try (ObjectOutputStream object = new ObjectOutputStream(Files.newOutputStream(path))) {
             object.writeObject(data);
-            return true;
         } catch (IOException e) {
             throw new RuntimeException("Ошибка при записи данных в файл: " + path, e);
         }
+        return true;
     }
 }

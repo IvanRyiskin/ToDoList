@@ -10,6 +10,7 @@ import todo.service.FileWorker;
 import todo.service.TaskService;
 import todo.view.ConsoleView;
 
+import java.nio.file.Path;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -20,7 +21,8 @@ public class Main {
         BlockingQueue<FileTask> blockingQueue = new LinkedBlockingQueue<>();
 
         // Файловый репозиторий (для хранения в файле ОС)
-        FileRepository fileRepository = new FileTaskRepository();
+        Path path = Path.of("src/main/test_resources/tasks.txt");
+        FileRepository fileRepository = new FileTaskRepository(path);
 
         // Репозиторий (хранилище в памяти)
         ConcurrentMap<Integer, Task> taskFileRepository = fileRepository.getData();
@@ -29,21 +31,25 @@ public class Main {
         // Сервис, использующий репозиторий
         TaskService service = new TaskService(inMemoryRepository, blockingQueue);
 
-        // 2-ой поток, обрабатывающий файл
-        FileWorker fileWorker = new FileWorker(fileRepository, blockingQueue, inMemoryRepository);
-        fileWorker.start();
-
         // Консольный интерфейс
         ConsoleView view = new ConsoleView(service, blockingQueue);
+
+        // 2-ой поток, обрабатывающий файл
+        FileWorker fileWorker = new FileWorker(fileRepository, blockingQueue, inMemoryRepository, service, view);
+
+        // Запуск программы
+        fileWorker.start();
         view.start();
     }
 }
 
-// Main запускает 2 поток с FileWorker
-// ConsoleView работает с FileWorker через blockingQueue (отправляет задачи  по изменению файла) он же отправляет сигнал для завершения потока (в методе старт вызывается метод стоп)
-// TaskService работает с FileWorker через blockingQueue (отправляет задачи  по изменению мапы)
+// Проблема со сменой файлового пути:
+// 1. В FileWorker смену репы с мапой сделал поверхностно.
+// Решение: подумать над лучшей реализацией (использовать событие, слушателя или перенести логику обновления на уровень выше)
+// 2. При завершении\старте нового сеанса, нет сохранения\загрузки текущего пути. Путь захардкожен и программа всегда начинает с установленого пути
+// Решение: нужно придумать динамическое определение пути при старте программы и его сохранение при завершении
 
-// В ConsoleView написать методы по изменению файла с директорией и завершению работы (все передается в blockingQueue)
-// В TaskService передавать в blockingQueue команду на обновления файла
-// В FileWorker написать методы по работе с файлом (вытаскивать значение и по значению определять какой метод вызывать)
-// Метод закрытия так же вызывать внутри треда
+// В самом конце добавить статусы синхрониации в таски. Чтобы можно было обрабатывать проблемные таски
+//    SYNCED,   // сохранено и в кэше, и в файле
+//    PENDING,  // только в кэше, ожидает записи в файл
+//    ERROR     // ошибка при записи в файл
