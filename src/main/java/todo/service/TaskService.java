@@ -24,7 +24,7 @@ public class TaskService {
         repository = newRepository;
     }
 
-    private static Task copyTask(Task task) {
+    public Task copyTask(Task task) {
         return new Task(task.getID(), task.getTitle(), task.getDescription(), task.getCREATEDATE(), task.getUpdateDate());
     }
 

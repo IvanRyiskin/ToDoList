@@ -23,6 +23,10 @@ public class ApplicationCoordinator {
         service.changeRepository(inMemoryTaskRepositoryMap);
     }
 
+    public Task copyTask(Task task) {
+        return service.copyTask(task);
+    }
+
     public void callBackFileAction(FileAction action, Task task) {
         switch (action) {
             case ADD -> view.addToFile(task.getTitle());
@@ -37,7 +41,6 @@ public class ApplicationCoordinator {
             case SHOW_PATH -> view.showCurrentPath(path);
         }
     }
-
 
     public void callBackErrorSaveToFile(String title) {
         view.errorSaveToFile(title);

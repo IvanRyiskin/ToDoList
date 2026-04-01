@@ -57,14 +57,10 @@ public class FileWorker {
         }
     }
 
-    private static Task copyTask(Task task) {
-        return new Task(task.getID(), task.getTitle(), task.getDescription(), task.getCREATEDATE(), task.getUpdateDate());
-    }
-
     private ConcurrentMap<Integer, Task> createSnapshot() {
         ConcurrentMap<Integer, Task> snapshot = new ConcurrentHashMap<>();
         for (Task task : inMemoryTaskRepository.getAllTasks()) {
-            snapshot.put(task.getID(), copyTask(task));
+            snapshot.put(task.getID(), applicationCoordinator.copyTask(task));
         }
         return snapshot;
     }
