@@ -5,5 +5,6 @@ public enum FileAction {
     UPDATE,
     DELETE,
     CHANGE_FILE,
+    SHOW_PATH,
     EXIT
 }

@@ -3,33 +3,28 @@ package todo.service;
 import todo.model.FileAction;
 import todo.model.FileTask;
 import todo.model.Task;
-import todo.repository.FileRepository;
-import todo.repository.InMemoryTaskRepositoryMap;
+import todo.repository.FileTaskRepository;
 import todo.repository.TaskRepository;
-import todo.view.ConsoleView;
 
 import java.nio.file.Path;
 import java.util.concurrent.*;
 
 public class FileWorker {
-    final FileRepository fileTaskRepository;
+    final FileTaskRepository fileTaskRepository;
     final BlockingQueue<FileTask> blockingQueue;
-    final ConsoleView consoleView;
-    final TaskService service;
-    TaskRepository<Task> inMemoryTaskRepositoryMap;
+    final ApplicationCoordinator applicationCoordinator;
+    TaskRepository<Task> inMemoryTaskRepository;
     private Future<?> future;
     ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    public FileWorker(FileRepository fileRepository,
+    public FileWorker(FileTaskRepository fileRepository,
                       BlockingQueue<FileTask> blockingQueue,
                       TaskRepository<Task> inMemoryRepositoryMap,
-                      TaskService service,
-                      ConsoleView consoleView) {
+                      ApplicationCoordinator applicationCoordinator) {
         this.fileTaskRepository = fileRepository;
         this.blockingQueue = blockingQueue;
-        this.inMemoryTaskRepositoryMap = inMemoryRepositoryMap;
-        this.service = service;
-        this.consoleView = consoleView;
+        this.inMemoryTaskRepository = inMemoryRepositoryMap;
+        this.applicationCoordinator = applicationCoordinator;
     }
 
     public void start() {
@@ -68,50 +63,44 @@ public class FileWorker {
 
     private ConcurrentMap<Integer, Task> createSnapshot() {
         ConcurrentMap<Integer, Task> snapshot = new ConcurrentHashMap<>();
-        for (Task task : inMemoryTaskRepositoryMap.getAllTasks()) {
+        for (Task task : inMemoryTaskRepository.getAllTasks()) {
             snapshot.put(task.getID(), copyTask(task));
         }
         return snapshot;
     }
 
-    private void callBackAction(FileAction action, Task task) {
-        switch (action) {
-            case ADD -> consoleView.addToFile(task.getTitle());
-            case UPDATE -> consoleView.updateToFile(task.getTitle());
-            case DELETE -> consoleView.deleteFromFile(task.getTitle());
-        }
-    }
-
     private void saveToFile(FileAction action, Task task) {
         try {
             fileTaskRepository.writeData(createSnapshot());
-            callBackAction(action, task);
+            applicationCoordinator.callBackFileAction(action, task);
         } catch (RuntimeException e) {
-            consoleView.errorSaveToFile(task.getTitle());
+            applicationCoordinator.callBackErrorSaveToFile(task.getTitle());
         }
     }
 
-    private void changeFilePath(Path path) {
+    private void changeFilePath(FileAction action, Path path) {
         try {
             // Обновляем путь
             fileTaskRepository.createFile(path);
 
             // Обновляем мапу
-            // Сделал поверхностно. Подумать над лучшей реализацией (использовать событие, слушателя или перенести логику обновления на уровень выше)
-            ConcurrentMap<Integer, Task> newTaskFileRepository = fileTaskRepository.getData();
-            inMemoryTaskRepositoryMap = new InMemoryTaskRepositoryMap(newTaskFileRepository);
-            service.changeRepository(inMemoryTaskRepositoryMap);
-
-            consoleView.changedFilePath(path);
+            ConcurrentMap<Integer, Task> newData = fileTaskRepository.getData();
+            applicationCoordinator.changeInMemoryTaskRepository(newData);
+            applicationCoordinator.callBackPathAction(action, path);
         } catch (RuntimeException e) {
-            consoleView.errorChangeFilePath(path);
+            applicationCoordinator.callBackErrorChangeFilePath(path);
         }
+    }
+
+    private void showFilePath(FileAction action) {
+        applicationCoordinator.callBackPathAction(action, fileTaskRepository.getPath());
     }
 
     private void fileAction(FileAction action, Object[] data) {
         switch (action) {
             case ADD, UPDATE, DELETE -> saveToFile(action, (Task) data[0]);
-            case CHANGE_FILE -> changeFilePath((Path) data[0]);
+            case CHANGE_FILE -> changeFilePath(action, (Path) data[0]);
+            case SHOW_PATH -> showFilePath(action);
             case EXIT -> stop();
         }
     }

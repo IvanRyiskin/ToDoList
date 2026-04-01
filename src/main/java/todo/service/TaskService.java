@@ -21,7 +21,7 @@ public class TaskService {
     }
 
     public void changeRepository(TaskRepository<Task> newRepository) {
-        this.repository = newRepository;
+        repository = newRepository;
     }
 
     private static Task copyTask(Task task) {

@@ -2,10 +2,10 @@ package todo;
 
 import todo.model.FileTask;
 import todo.model.Task;
-import todo.repository.FileRepository;
 import todo.repository.FileTaskRepository;
 import todo.repository.InMemoryTaskRepositoryMap;
 import todo.repository.TaskRepository;
+import todo.service.ApplicationCoordinator;
 import todo.service.FileWorker;
 import todo.service.TaskService;
 import todo.view.ConsoleView;
@@ -22,7 +22,7 @@ public class Main {
 
         // Файловый репозиторий (для хранения в файле ОС)
         Path path = Path.of("src/main/test_resources/tasks.txt");
-        FileRepository fileRepository = new FileTaskRepository(path);
+        FileTaskRepository fileRepository = new FileTaskRepository(path);
 
         // Репозиторий (хранилище в памяти)
         ConcurrentMap<Integer, Task> taskFileRepository = fileRepository.getData();
@@ -34,8 +34,11 @@ public class Main {
         // Консольный интерфейс
         ConsoleView view = new ConsoleView(service, blockingQueue);
 
+        // Координатор событий
+        ApplicationCoordinator coordinator = new ApplicationCoordinator(service, view);
+
         // 2-ой поток, обрабатывающий файл
-        FileWorker fileWorker = new FileWorker(fileRepository, blockingQueue, inMemoryRepository, service, view);
+        FileWorker fileWorker = new FileWorker(fileRepository, blockingQueue, inMemoryRepository, coordinator);
 
         // Запуск программы
         fileWorker.start();
@@ -44,9 +47,7 @@ public class Main {
 }
 
 // Проблема со сменой файлового пути:
-// 1. В FileWorker смену репы с мапой сделал поверхностно.
-// Решение: подумать над лучшей реализацией (использовать событие, слушателя или перенести логику обновления на уровень выше)
-// 2. При завершении\старте нового сеанса, нет сохранения\загрузки текущего пути. Путь захардкожен и программа всегда начинает с установленого пути
+// 1. При завершении\старте нового сеанса, нет сохранения\загрузки текущего пути. Путь захардкожен и программа всегда начинает с установленого пути
 // Решение: нужно придумать динамическое определение пути при старте программы и его сохранение при завершении
 
 // В самом конце добавить статусы синхрониации в таски. Чтобы можно было обрабатывать проблемные таски

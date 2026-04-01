@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class FileTaskRepositoryTest {
 
-    FileRepository fileRepository;
+    FileTaskRepository fileRepository;
     TaskRepository<Task> inMemoryRepository;
     Task task;
     Path path;
@@ -54,7 +54,7 @@ class FileTaskRepositoryTest {
     @Test
     void getDataFromEmptyFile() {
         Path emtyPath = Path.of("src/main/test_resources/emptyTasks.txt");
-        FileRepository emptyFileRepository = new FileTaskRepository(emtyPath);
+        FileTaskRepository emptyFileRepository = new FileTaskRepository(emtyPath);
         ConcurrentMap<Integer, Task> getFile = emptyFileRepository.getData();
         assertTrue(getFile.isEmpty());
         tempFiles.add(emtyPath);

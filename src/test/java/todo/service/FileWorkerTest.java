@@ -3,7 +3,6 @@ package todo.service;
 import org.junit.jupiter.api.*;
 import todo.model.FileTask;
 import todo.model.Task;
-import todo.repository.FileRepository;
 import todo.repository.FileTaskRepository;
 import todo.repository.InMemoryTaskRepositoryMap;
 import todo.repository.TaskRepository;
@@ -25,10 +24,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class FileWorkerTest {
 
     static BlockingQueue<FileTask> blockingQueue;
-    static FileRepository fileRepository;
+    static FileTaskRepository fileRepository;
     static ConcurrentMap<Integer, Task> taskFileRepository;
     static TaskRepository<Task> inMemoryRepository;
     static TaskService service;
+    static ApplicationCoordinator coordinator;
     static ConsoleView view;
     static FileWorker fileWorker;
     static Path path = Path.of("src/main/test_resources/tasks.txt");
@@ -44,8 +44,9 @@ class FileWorkerTest {
         taskFileRepository = fileRepository.getData();
         inMemoryRepository = new InMemoryTaskRepositoryMap(taskFileRepository);
         service = new TaskService(inMemoryRepository, blockingQueue);
+        coordinator = new ApplicationCoordinator(service, view);
         view = new ConsoleView(service, blockingQueue);
-        fileWorker = new FileWorker(fileRepository, blockingQueue, inMemoryRepository, service, view);
+        fileWorker = new FileWorker(fileRepository, blockingQueue, inMemoryRepository, coordinator);
         fileWorker.start();
     }
 

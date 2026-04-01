@@ -1,5 +1,6 @@
 package todo.repository;
 
+import lombok.Getter;
 import todo.model.Task;
 
 import java.io.IOException;
@@ -10,7 +11,8 @@ import java.nio.file.Path;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class FileTaskRepository implements FileRepository {
+@Getter
+public class FileTaskRepository {
 
     private Path path;
 

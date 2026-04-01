@@ -10,8 +10,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
 
-import static todo.model.FileAction.CHANGE_FILE;
-import static todo.model.FileAction.EXIT;
+import static todo.model.FileAction.*;
 
 public class ConsoleView implements FileOperationCallback {
     private final TaskService taskService;
@@ -46,6 +45,12 @@ public class ConsoleView implements FileOperationCallback {
     public void changedFilePath(Path path) {
         synchronized (System.out) {
             System.out.println("\nФайловый путь был изменен на " + path.getParent() + ", " + "с именем файла: " + path.getFileName());
+        }
+    }
+
+    public void showCurrentPath(Path path) {
+        synchronized (System.out) {
+            System.out.println("\nТекущий файловый путь " + path.getParent() + ", " + "с именем файла: " + path.getFileName());
         }
     }
 
@@ -88,6 +93,9 @@ public class ConsoleView implements FileOperationCallback {
                 case "7":
                     changeFilePath();
                     continue;
+                case "8":
+                    showPath();
+                    continue;
                 case "0":
                     try {
                         blockingQueue.put(new FileTask(EXIT));
@@ -113,6 +121,7 @@ public class ConsoleView implements FileOperationCallback {
         System.out.println("5. Обновить задачу");
         System.out.println("6. Удалить задачу по ID");
         System.out.println("7. Изменить расположение файла; создать новый в новом месте");
+        System.out.println("8. Показать текущую директорию файла");
         System.out.println("0. Выход");
         System.out.print("Выбор: ");
     }
@@ -194,7 +203,7 @@ public class ConsoleView implements FileOperationCallback {
         Task task = taskService.createTask(title, description);
         boolean successAdded = taskService.addTask(task);
         if (successAdded) {
-            System.out.println("Задача добавлена успешно!");
+            System.out.println("Задача добавлена в кеш успешно!");
         } else {
             System.out.println("Не удалось добавить задачу");
         }
@@ -313,7 +322,7 @@ public class ConsoleView implements FileOperationCallback {
                 }
             }
         }
-        System.out.println("Задача успешно обновлена! \n" + task);
+        System.out.println("Задача в кеше успешно обновлена! \n" + task);
     }
 
     public void deleteTask() {
@@ -349,7 +358,7 @@ public class ConsoleView implements FileOperationCallback {
                 }
             }
         }
-        System.out.println("Задача успешно удалена!");
+        System.out.println("Задача из кеша успешно удалена!");
     }
 
     public void changeFilePath() {
@@ -439,6 +448,20 @@ public class ConsoleView implements FileOperationCallback {
             result = result.resolve(parts[i].trim());
         }
         return result;
+    }
+
+    public void showPath() {
+        try {
+            blockingQueue.put(new FileTask(SHOW_PATH));
+        } catch (InterruptedException e) {
+            try {
+                blockingQueue.put(new FileTask(EXIT));
+            } catch (InterruptedException ex) {
+                // Подумать над экстренным сохранением в файл всех данных
+                System.err.println("Произошло непредвиденное завершение работы программы. Завершаем все процессы...");
+                throw new RuntimeException(ex);
+            }
+        }
     }
 }
 

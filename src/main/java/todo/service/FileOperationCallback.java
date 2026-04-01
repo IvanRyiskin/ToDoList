@@ -11,6 +11,8 @@ public interface FileOperationCallback {
 
     void changedFilePath(Path path);
 
+    void showCurrentPath(Path path);
+
     void errorSaveToFile(String taskName);
 
     void errorChangeFilePath(Path path);
