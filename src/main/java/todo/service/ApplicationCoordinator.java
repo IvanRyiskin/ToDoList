@@ -18,6 +18,7 @@ public class ApplicationCoordinator {
 
     public void changeInMemoryTaskRepository(TaskRepository<Task> newInMemoryTaskRepository) {
         service.changeRepository(newInMemoryTaskRepository);
+        service.defineNewSetOfId();
     }
 
     public Task copyTask(Task task) {
