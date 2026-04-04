@@ -3,29 +3,34 @@ package todo.service;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import todo.model.FileTask;
 import todo.model.Task;
-import todo.repository.InMemoryTaskRepositoryList;
+import todo.repository.InMemoryTaskRepositoryMap;
 import todo.repository.TaskRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class TaskServiceTest {
     static TaskService service;
     static TaskRepository<Task> repository;
+    static BlockingQueue<FileTask> blockingQueue;
     Task task;
 
     @BeforeAll
     static void init() {
-        repository = new InMemoryTaskRepositoryList();
-        service = new TaskService(repository);
+        BlockingQueue<FileTask> blockingQueue = new LinkedBlockingQueue<>();
+        repository = new InMemoryTaskRepositoryMap();
+        service = new TaskService(repository, blockingQueue);
     }
 
     @BeforeEach
     void setUp() {
-        task = new Task((int) (Math.random() * 1000),"Task", "Description", LocalDateTime.now());
+        task = new Task((int) (Math.random() * 1000), "Task", "Description", LocalDateTime.now());
     }
 
     @Test
@@ -45,7 +50,7 @@ class TaskServiceTest {
     @Test
     void getTaskById() {
         service.addTask(task);
-        Task result  = service.getTask(task.getID());
+        Task result = service.getTask(task.getID());
         assertEquals(task, result);
     }
 
@@ -64,45 +69,46 @@ class TaskServiceTest {
 
     @Test
     void updateTaskAllFields() {
-        int taskId = task.getID();
         String updatedTitle = "Geeky";
         String updatedDescription = "Drink beer and code";
         service.addTask(task);
-        service.updateTask(taskId, updatedTitle, updatedDescription);
-        assertEquals(updatedTitle, task.getTitle());
-        assertEquals(updatedDescription, task.getDescription());
+        service.updateTask(task, updatedTitle, updatedDescription);
+        Task updatedTask = repository.getTask(task.getID());
+        assertEquals(updatedTitle, updatedTask.getTitle());
+        assertEquals(updatedDescription, updatedTask.getDescription());
     }
 
     @Test
     void updateTaskTitleOnly() {
-        int taskId = task.getID();
         String updatedTitle = "Task1";
         service.addTask(task);
-        service.updateTask(taskId, updatedTitle, null);
-        assertEquals(updatedTitle, task.getTitle());
-        assertEquals("Description", task.getDescription());
+        service.updateTask(task, updatedTitle, null);
+        Task updatedTask = repository.getTask(task.getID());
+        assertEquals(updatedTitle, updatedTask.getTitle());
+        assertEquals("Description", updatedTask.getDescription());
     }
 
     @Test
     void updateTaskDescriptionOnly() {
-        int taskId = task.getID();
         String updatedDescription = "Drink beer and code";
         service.addTask(task);
-        service.updateTask(taskId, null, updatedDescription);
-        assertEquals("Task", task.getTitle());
-        assertEquals(updatedDescription, task.getDescription());
+        service.updateTask(task, null, updatedDescription);
+        Task updatedTask = repository.getTask(task.getID());
+        assertEquals("Task", updatedTask.getTitle());
+        assertEquals(updatedDescription, updatedTask.getDescription());
     }
 
     @Test
     void deleteTaskSuccess() {
         service.addTask(task);
         assertNotNull(service.getTask(task.getID()));
-        service.deleteTask(task.getID());
+        service.deleteTask(task);
         assertNull(service.getTask(task.getID()));
     }
 
     @Test
     void deleteTaskFail() {
-        assertFalse(service.deleteTask(100));
+        task = new Task(30, "Beer", "Drink beer", LocalDateTime.now());
+        assertFalse(service.deleteTask(task));
     }
 }

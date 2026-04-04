@@ -1,25 +1,70 @@
 package todo.service;
 
+import todo.model.FileTask;
 import todo.model.Task;
 import todo.repository.TaskRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.BlockingQueue;
+
+import static todo.model.FileAction.*;
 
 public class TaskService {
-    private final TaskRepository<Task> repository;
-    private int idCounter = 1;
+    private final BlockingQueue<FileTask> blockingQueue;
+    private TaskRepository<Task> repository;
+    private Set<Integer> setOfId;
+    private int idCounter;
 
-    public TaskService(TaskRepository<Task> repository) {
+    public TaskService(TaskRepository<Task> repository, BlockingQueue<FileTask> blockingQueue) {
         this.repository = repository;
+        this.blockingQueue = blockingQueue;
+        defineNewSetOfId();
+    }
+
+    public void changeRepository(TaskRepository<Task> newRepository) {
+        repository = newRepository;
+    }
+
+    public Task copyTask(Task task) {
+        return new Task(task.getID(), task.getTitle(), task.getDescription(), task.getCREATEDATE(), task.getUpdateDate());
     }
 
     public Task createTask(String title, String description) {
+        defineIdCounter();
         return new Task(idCounter++, title, description, LocalDateTime.now());
     }
 
+    private void defineIdCounter() {
+        while (setOfId.contains(idCounter)) {
+            idCounter++;
+        }
+    }
+
+    public void defineNewSetOfId() {
+        setOfId = repository.getTasksRepository().keySet();
+        setDefaultIdCounter();
+    }
+
+    private void setDefaultIdCounter() {
+        idCounter = 1;
+    }
+
     public boolean addTask(Task task) {
-        return repository.addTask(task);
+        boolean result = repository.addTask(task);
+        try {
+            blockingQueue.put(new FileTask(ADD, task));
+        } catch (InterruptedException e) {
+            try {
+                blockingQueue.put(new FileTask(EXIT));
+            } catch (InterruptedException ex) {
+                // Подумать над экстренным сохранением в файл всех данных
+                System.err.println("Произошло непредвиденное завершение работы программы. Завершаем все процессы...");
+                throw new RuntimeException(ex);
+            }
+        }
+        return result;
     }
 
     public Task getTask(int id) {
@@ -34,11 +79,36 @@ public class TaskService {
         return repository.getAllTasks();
     }
 
-    public boolean updateTask(int id, String updatedTitle, String updatedDescription) {
-        return repository.updateTask(id, updatedTitle, updatedDescription, LocalDateTime.now());
+    public boolean updateTask(Task task, String updatedTitle, String updatedDescription) {
+        Task updatedTask = copyTask(task);
+        boolean result = repository.updateTask(task, updatedTask, updatedTitle, updatedDescription, LocalDateTime.now());
+        try {
+            blockingQueue.put(new FileTask(UPDATE, task));
+        } catch (InterruptedException e) {
+            try {
+                blockingQueue.put(new FileTask(EXIT));
+            } catch (InterruptedException ex) {
+                // Подумать над экстренным сохранением в файл всех данных
+                System.err.println("Произошло непредвиденное завершение работы программы. Завершаем все процессы...");
+                throw new RuntimeException(ex);
+            }
+        }
+        return result;
     }
 
-    public boolean deleteTask(int id) {
-        return repository.deleteTask(id);
+    public boolean deleteTask(Task task) {
+        boolean result = repository.deleteTask(task);
+        try {
+            blockingQueue.put(new FileTask(DELETE, task));
+        } catch (InterruptedException e) {
+            try {
+                blockingQueue.put(new FileTask(EXIT));
+            } catch (InterruptedException ex) {
+                // Подумать над экстренным сохранением в файл всех данных
+                System.err.println("Произошло непредвиденное завершение работы программы. Завершаем все процессы...");
+                throw new RuntimeException(ex);
+            }
+        }
+        return result;
     }
 }

@@ -2,12 +2,12 @@ package todo.model;
 
 import lombok.*;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Data
 @RequiredArgsConstructor
-public class Task {
+public class Task implements Serializable {
     @Setter(AccessLevel.NONE)
     private final int ID;
     @NonNull
@@ -17,4 +17,12 @@ public class Task {
     @Setter(AccessLevel.NONE)
     private final LocalDateTime CREATEDATE;
     private LocalDateTime updateDate;
+
+    public Task(int ID, String title, String description, LocalDateTime CREATEDATE, LocalDateTime updateDate) {
+        this.ID = ID;
+        this.title = title;
+        this.description = description;
+        this.CREATEDATE = CREATEDATE;
+        this.updateDate = updateDate;
+    }
 }

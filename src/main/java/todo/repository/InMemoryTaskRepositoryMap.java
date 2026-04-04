@@ -2,26 +2,37 @@ package todo.repository;
 
 import todo.model.Task;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-public class InMemoryTaskRepositoryMap implements TaskRepository<Task> {
-    Map<Integer, Task> tasks = new HashMap<>();
+public class InMemoryTaskRepositoryMap implements TaskRepository<Task>, Serializable {
 
-    @Override
-    public boolean addTask(Task task) {
-        return tasks.put(task.getID(), task) == null;
+    private final ConcurrentMap<Integer, Task> tasks;
+
+    public InMemoryTaskRepositoryMap() {
+        tasks = new ConcurrentHashMap<>();
     }
 
-    @Override
+    public InMemoryTaskRepositoryMap(ConcurrentMap<Integer, Task> tasks) {
+        this.tasks = tasks;
+    }
+
+    public ConcurrentMap<Integer, Task> getTasksRepository() {
+        return tasks;
+    }
+
+    public boolean addTask(Task task) {
+        return tasks.putIfAbsent(task.getID(), task) == null;
+    }
+
     public Task getTask(int id) {
         return tasks.getOrDefault(id, null);
     }
 
-    @Override
     public Task getTask(String title) {
         for (Task task : tasks.values()) {
             if (task.getTitle().equals(title)) {
@@ -31,29 +42,22 @@ public class InMemoryTaskRepositoryMap implements TaskRepository<Task> {
         return null;
     }
 
-    @Override
     public List<Task> getAllTasks() {
         return new ArrayList<>(tasks.values());
     }
 
-    @Override
-    public boolean updateTask(int id, String updatedTitle, String updatedDescription, LocalDateTime localDateTime) {
-        if (tasks.containsKey(id)) {
-            Task task = tasks.get(id);
-            if (updatedTitle != null) {
-                task.setTitle(updatedTitle);
-            }
-            if (updatedDescription != null) {
-                task.setDescription(updatedDescription);
-            }
-            task.setUpdateDate(localDateTime);
-            return true;
+    public boolean updateTask(Task task, Task updatedTask, String updatedTitle, String updatedDescription, LocalDateTime localDateTime) {
+        if (updatedTitle != null) {
+            updatedTask.setTitle(updatedTitle);
         }
-        return false;
+        if (updatedDescription != null) {
+            updatedTask.setDescription(updatedDescription);
+        }
+        updatedTask.setUpdateDate(localDateTime);
+        return tasks.replace(task.getID(), task, updatedTask);
     }
 
-    @Override
-    public boolean deleteTask(int id) {
-        return tasks.remove(id) != null;
+    public boolean deleteTask(Task task) {
+        return tasks.remove(task.getID(), task);
     }
 }

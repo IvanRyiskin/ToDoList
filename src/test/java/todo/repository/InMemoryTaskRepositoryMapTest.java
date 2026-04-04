@@ -58,45 +58,49 @@ class InMemoryTaskRepositoryMapTest {
 
     @Test
     void updateTaskAllFields() {
-        int taskId = task.getID();
         String updatedTitle = "Geeky";
         String updatedDescription = "Drink beer and code";
         repository.addTask(task);
-        repository.updateTask(taskId, updatedTitle, updatedDescription, LocalDateTime.now());
-        assertEquals(updatedTitle, task.getTitle());
-        assertEquals(updatedDescription, task.getDescription());
+        Task updatedTask = new Task(task.getID(), task.getTitle(), task.getDescription(), task.getCREATEDATE());
+        repository.updateTask(task, updatedTask, updatedTitle, updatedDescription, LocalDateTime.now());
+        updatedTask = repository.getTask(task.getID());
+        assertEquals(updatedTitle, updatedTask.getTitle());
+        assertEquals(updatedDescription, updatedTask.getDescription());
     }
 
     @Test
     void updateTaskTitleOnly() {
-        int taskId = task.getID();
         String updatedTitle = "Geeky1";
         repository.addTask(task);
-        repository.updateTask(taskId, updatedTitle, null, LocalDateTime.now());
-        assertEquals(updatedTitle, task.getTitle());
-        assertEquals("Drink beer", task.getDescription());
+        Task updatedTask = new Task(task.getID(), task.getTitle(), task.getDescription(), task.getCREATEDATE());
+        repository.updateTask(task, updatedTask, updatedTitle, null, LocalDateTime.now());
+        updatedTask = repository.getTask(task.getID());
+        assertEquals(updatedTitle, updatedTask.getTitle());
+        assertEquals("Drink beer", updatedTask.getDescription());
     }
 
     @Test
     void updateTaskDescriptionOnly() {
-        int taskId = task.getID();
         String updatedDescription = "Drink beer and code2";
         repository.addTask(task);
-        repository.updateTask(taskId, null, updatedDescription, LocalDateTime.now());
-        assertEquals("Beer", task.getTitle());
-        assertEquals(updatedDescription, task.getDescription());
+        Task updatedTask = new Task(task.getID(), task.getTitle(), task.getDescription(), task.getCREATEDATE());
+        repository.updateTask(task, updatedTask, null, updatedDescription, LocalDateTime.now());
+        updatedTask = repository.getTask(task.getID());
+        assertEquals("Beer", updatedTask.getTitle());
+        assertEquals(updatedDescription, updatedTask.getDescription());
     }
 
     @Test
     void deleteTaskSuccess() {
         repository.addTask(task);
         assertNotNull(repository.getTask(task.getID()));
-        repository.deleteTask(task.getID());
+        repository.deleteTask(task);
         assertNull(repository.getTask(task.getID()));
     }
 
     @Test
     void deleteTaskFail() {
-        assertFalse(repository.deleteTask(100));
+        task = new Task(20, "Beer", "Drink beer", LocalDateTime.now());
+        assertFalse(repository.deleteTask(task));
     }
 }
