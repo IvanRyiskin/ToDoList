@@ -4,6 +4,7 @@ import todo.model.FileAction;
 import todo.model.FileTask;
 import todo.model.Task;
 import todo.repository.FileTaskRepository;
+import todo.repository.InMemoryTaskRepositoryMap;
 import todo.repository.TaskRepository;
 
 import java.nio.file.Path;
@@ -81,7 +82,8 @@ public class FileWorker {
 
             // Обновляем мапу
             ConcurrentMap<Integer, Task> newData = fileTaskRepository.getData();
-            applicationCoordinator.changeInMemoryTaskRepository(newData);
+            inMemoryTaskRepository = new InMemoryTaskRepositoryMap(newData);
+            applicationCoordinator.changeInMemoryTaskRepository(inMemoryTaskRepository);
             applicationCoordinator.callBackPathAction(action, path);
         } catch (RuntimeException e) {
             applicationCoordinator.callBackErrorChangeFilePath(path);

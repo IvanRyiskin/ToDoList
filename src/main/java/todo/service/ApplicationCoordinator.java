@@ -2,12 +2,10 @@ package todo.service;
 
 import todo.model.FileAction;
 import todo.model.Task;
-import todo.repository.InMemoryTaskRepositoryMap;
 import todo.repository.TaskRepository;
 import todo.view.ConsoleView;
 
 import java.nio.file.Path;
-import java.util.concurrent.ConcurrentMap;
 
 public class ApplicationCoordinator {
     private final ConsoleView view;
@@ -18,10 +16,8 @@ public class ApplicationCoordinator {
         this.service = service;
     }
 
-    public void changeInMemoryTaskRepository(ConcurrentMap<Integer, Task> newInMemoryTaskRepository) {
-        TaskRepository<Task> inMemoryTaskRepositoryMap = new InMemoryTaskRepositoryMap(newInMemoryTaskRepository);
-        service.changeRepository(inMemoryTaskRepositoryMap);
-        service.defineNewSetOfId();
+    public void changeInMemoryTaskRepository(TaskRepository<Task> newInMemoryTaskRepository) {
+        service.changeRepository(newInMemoryTaskRepository);
     }
 
     public Task copyTask(Task task) {
