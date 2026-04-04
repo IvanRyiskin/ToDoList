@@ -21,6 +21,7 @@ public class ApplicationCoordinator {
     public void changeInMemoryTaskRepository(ConcurrentMap<Integer, Task> newInMemoryTaskRepository) {
         TaskRepository<Task> inMemoryTaskRepositoryMap = new InMemoryTaskRepositoryMap(newInMemoryTaskRepository);
         service.changeRepository(inMemoryTaskRepositoryMap);
+        service.defineNewSetOfId();
     }
 
     public Task copyTask(Task task) {

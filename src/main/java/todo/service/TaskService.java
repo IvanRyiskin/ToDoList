@@ -6,6 +6,7 @@ import todo.repository.TaskRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
 import static todo.model.FileAction.*;
@@ -13,11 +14,13 @@ import static todo.model.FileAction.*;
 public class TaskService {
     private final BlockingQueue<FileTask> blockingQueue;
     private TaskRepository<Task> repository;
-    private int idCounter = 1;
+    private Set<Integer> setOfId;
+    private int idCounter;
 
     public TaskService(TaskRepository<Task> repository, BlockingQueue<FileTask> blockingQueue) {
         this.repository = repository;
         this.blockingQueue = blockingQueue;
+        defineNewSetOfId();
     }
 
     public void changeRepository(TaskRepository<Task> newRepository) {
@@ -29,7 +32,23 @@ public class TaskService {
     }
 
     public Task createTask(String title, String description) {
+        defineIdCounter();
         return new Task(idCounter++, title, description, LocalDateTime.now());
+    }
+
+    private void defineIdCounter() {
+        while (setOfId.contains(idCounter)) {
+            idCounter++;
+        }
+    }
+
+    public void defineNewSetOfId() {
+        setOfId = repository.getTasksRepository().keySet();
+        setDefaultIdCounter();
+    }
+
+    private void setDefaultIdCounter() {
+        idCounter = 1;
     }
 
     public boolean addTask(Task task) {
